@@ -11,6 +11,7 @@ from tqdm import tqdm
 import re
 from requests.exceptions import ConnectionError
 
+PLACEHOLDER = "<no select>"
 
 def download_file(url, file_name):
     # Maximum number of retries
@@ -243,6 +244,7 @@ def update_next_page(show_nsfw):
             if not temp_nsfw:
                 model_dict[item['name']] = item['name']
     return gr.Dropdown.update(choices=[v for k, v in model_dict.items()], value=None), gr.Dropdown.update(choices=[], value=None)
+    return gr.Dropdown.update(choices=[PLACEHOLDER] + [v for k, v in model_dict.items()], value=PLACEHOLDER), gr.Dropdown.update(choices=[], value=None)
 
 
 def update_model_list(content_type, sort_type, use_search_term, search_term, show_nsfw):
@@ -258,9 +260,11 @@ def update_model_list(content_type, sort_type, use_search_term, search_term, sho
             if not temp_nsfw:
                 model_dict[item['name']] = item['name']
     return gr.Dropdown.update(choices=[v for k, v in model_dict.items()], value=None), gr.Dropdown.update(choices=[], value=None)
+    return gr.Dropdown.update(choices=[PLACEHOLDER] + [v for k, v in model_dict.items()], value=PLACEHOLDER), gr.Dropdown.update(choices=[], value=None)
 
 def update_model_versions(model_name=None):
     if model_name is not None:
+    if model_name is not None and model_name != PLACEHOLDER:
         global json_data
         versions_dict = {}
         for item in json_data['items']:
@@ -269,6 +273,7 @@ def update_model_versions(model_name=None):
                 for model in item['modelVersions']:
                     versions_dict[model['name']] = item["name"]
         return gr.Dropdown.update(choices=[k + ' - ' + v for k, v in versions_dict.items()], value=f'{next(iter(versions_dict.keys()))} - {model_name}')
+        return gr.Dropdown.update(choices=[PLACEHOLDER] + [k + ' - ' + v for k, v in versions_dict.items()], value=PLACEHOLDER)
     else:
         return gr.Dropdown.update(choices=[], value=None)
 
@@ -291,6 +296,7 @@ def update_dl_url(model_name=None, model_version=None, model_filename=None):
 
 def update_model_info(model_name=None, model_version=None):
     if model_name and model_version:
+    if model_name and model_version and model_name != PLACEHOLDER and model_version != PLACEHOLDER:
         model_version = model_version.replace(f' - {model_name}','').strip()
         global json_data
         output_html = ""
@@ -323,6 +329,7 @@ def update_model_info(model_name=None, model_version=None):
 
 
         return gr.HTML.update(value=output_html), gr.Textbox.update(value=output_training), gr.Dropdown.update(choices=[k for k, v in dl_dict.items()], value=next(iter(dl_dict.keys())))
+        return gr.HTML.update(value=output_html), gr.Textbox.update(value=output_training), gr.Dropdown.update(choices=[PLACEHOLDER] + [k for k, v in dl_dict.items()], value=PLACEHOLDER)
     else:
         return gr.HTML.update(value=None), gr.Textbox.update(value=None), gr.Dropdown.update(choices=[], value=None)
 
