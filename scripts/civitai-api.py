@@ -1,8 +1,12 @@
 import requests
 import json
-import modules.scripts as scripts
 import gradio as gr
-from modules import script_callbacks
+try:
+    from modules import script_callbacks
+    import modules.scripts as scripts
+    sdless = False
+except Exception:
+    sdless = True
 import time
 import threading
 import urllib.request
@@ -522,6 +526,12 @@ def on_ui_tabs():
             ]
         )
 
-    return (civitai_interface, "CivitAi", "civitai_interface"),
+    if sdless:
+        civitai_interface.queue(64).launch(inbrowser=True)
+    else:
+        return (civitai_interface, "CivitAi", "civitai_interface"),
 
-script_callbacks.on_ui_tabs(on_ui_tabs)
+if not sdless:
+    script_callbacks.on_ui_tabs(on_ui_tabs)
+else:
+    on_ui_tabs()
